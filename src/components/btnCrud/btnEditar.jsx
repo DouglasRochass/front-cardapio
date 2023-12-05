@@ -1,29 +1,51 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
 import "../btnAdicionar/btnAdicionar.css";
 import HomeLog from "../../pages/homeLog";
 
-const BtnEditar = () => {
+const BtnEditar = ({ idProduto }) => {
   const nav = useNavigate();
-
-  function navegar() {
-    nav("/logado");
-  }
 
   const [nome, setNome] = useState("");
   const [valor, setValor] = useState(0);
   const [descricao, setDescricao] = useState("");
   const [categoria, setCategoria] = useState("");
 
-  function handleSalvar() {
+  async function handleSalvar() {
     if (nome === "" || valor === "" || descricao === "") {
       toast.warning("Preencha todos os campos!");
     } else {
-      //manda pro banco se tiver tudo certo
-      toast.success("Item salvo com sucesso!");
+      try {
+        const response = await fetch(`https://funny-handkerchief-newt.cyclic.app/atualizar/${idProduto}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': 'https://funny-handkerchief-newt.cyclic.app', // Adicione este cabeçalho
+          },
+          body: JSON.stringify({
+            nome,
+            preco: valor,
+            descricao,
+            categoria,
+          }),
+        });
+
+        if (response.ok) {
+          toast.success("Item salvo com sucesso!");
+          
+        } else {
+          toast.error("Não foi possível adicionar o item.");
+        }
+      } catch (error) {
+        console.error("Erro ao salvar o item:", error);
+        toast.error("Erro ao salvar o item. Revise as informações.");
+      }
     }
   }
+
 
   return (
     <>
@@ -41,7 +63,7 @@ const BtnEditar = () => {
         <div className="container-add">
           <div className="top">
             <h1>Editar Item</h1>
-            <button onClick={navegar} className="add-sair">
+            <button onClick={() => nav("/logado")} className="add-sair">
               {" "}
               ✕
             </button>
@@ -52,6 +74,7 @@ const BtnEditar = () => {
               <input
                 type="text"
                 placeholder="Ex: X-Tudo"
+                value={nome}
                 onChange={(e) => setNome(e.target.value)}
               />
             </div>
@@ -60,6 +83,7 @@ const BtnEditar = () => {
               <input
                 type="text"
                 placeholder="R$"
+                value={valor}
                 onChange={(e) => setValor(e.target.value)}
               />
             </div>
@@ -69,6 +93,7 @@ const BtnEditar = () => {
                 type="text"
                 className="descricao"
                 placeholder="Ex: Pão, Hamburguer, etc."
+                value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
               />
             </div>
@@ -76,6 +101,7 @@ const BtnEditar = () => {
               <h3>Categoria: </h3>
               <select
                 name={categoria}
+                value={categoria}
                 onChange={(e) => setCategoria(e.target.value)}
                 className="categoria"
               >
@@ -87,8 +113,6 @@ const BtnEditar = () => {
             </div>
           </div>
           <div className="botoes-add">
-            {/* retornando um array com as opcoes (nome, valor, descricao e categoria) */}
-            {/* <button onClick={() => {console.log([nome, valor, descricao, categoria])}}>Salvar</button> */}
             <button onClick={() => handleSalvar()}>Salvar</button>
           </div>
         </div>
