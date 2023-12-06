@@ -35,5 +35,4 @@ const Btns = ({ onEdit, onDelete }) => {
     </>
   );
 };
-
 export default Btns;

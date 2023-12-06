@@ -7,6 +7,7 @@ import HeaderLog from "../../headerLog/headerLog";
 import BtnAdicionar from "../../btnAdicionar/btnAdicionar";
 import Btns from "../../btnCrud/btns";
 import BtnDeletar from '../../btnCrud/btnDelete';
+import BtnEditar from '../../btnCrud/btnEditar';
 
 const Outros = () => {
   const [lanches, setOutros] = useState([]);
@@ -22,15 +23,27 @@ const Outros = () => {
       });
   }, []);
 
-  const handleEdit = () => {
-    console.log("Editar item com ID:", selectedId);
-    // Implemente a lógica de edição aqui, por exemplo, redirecionar para a página de edição
+  const handleEdit = (id) => {
+    setSelectedId(id);
   };
 
-  const handleDelete = () => {
-    console.log("Excluir item com ID:", selectedId);
-    // Implemente a lógica de exclusão aqui
-    // Por exemplo, abrir um modal de confirmação ou chamar a função de exclusão direta
+  const handleDelete = (id) => {
+    axios.delete(`https://funny-handkerchief-newt.cyclic.app/deletar/${id}`)
+      .then(response => {
+        if (response.status === 200) {
+          setOutros(prevLanches => prevLanches.filter(item => item.id !== id));
+          setSelectedId(null);
+        } else {
+          console.error("Erro ao deletar o item. Revise as informações.");
+        }
+      })
+      .catch(error => {
+        console.error("Erro ao deletar o item:", error);
+      });
+  };
+
+  const getSelectedProduct = () => {
+    return lanches.find((item) => item.id === selectedId);
   };
 
   return (
@@ -39,7 +52,7 @@ const Outros = () => {
       <BtnAdicionar />
       <CategoriasLog />
       <div className="container-lanche">
-        <h1>Outros</h1>
+        <h1>outros</h1>
         {lanches.map(item => (
           <div key={item.id} className="card">
             <div className="lanche-txt">
@@ -48,14 +61,8 @@ const Outros = () => {
               <h3 id="preco">{`R$${item.preco}`}</h3>
             </div>
             <Btns
-              onEdit={() => {
-                setSelectedId(item.id);
-                handleEdit();
-              }}
-              onDelete={() => {
-                setSelectedId(item.id);
-                handleDelete();
-              }}
+              onEdit={() => handleEdit(item.id)}
+              onDelete={() => handleDelete(item.id)}
             />
           </div>
         ))}
@@ -63,13 +70,21 @@ const Outros = () => {
       {selectedId && (
         <BtnDeletar
           onDeletar={() => {
+            console.log("Deletar clicado");
             // Handle deletion completion if needed
-            setOutros(prevLanches => prevLanches.filter(item => item.id !== selectedId));
+          }}
+          onCancelar={() => {
+            console.log("Cancelar clicado");
             setSelectedId(null);
           }}
-          onCancelar={() => setSelectedId(null)}
           categoria="outros"
           id={selectedId}
+        />
+      )}
+      {selectedId && (
+        <BtnEditar
+          idProduto={selectedId}
+          produto={getSelectedProduct()} // Pass the selected product data
         />
       )}
     </>
